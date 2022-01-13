@@ -85,79 +85,98 @@ static void BL_readDataFromFlash(BL_command_t *BL, uint32_t flashStartAddress)
     @{
 */#ifndef __BL_COMMAND_READ_AND_WRITE
 #define __BL_COMMAND_READ_AND_WRITE
-/** @brief  BL_send_command
-    @return bool
+
+/** @brief  BL_sendCommand
+    @return stm32_err_t
 */
-bool BL_get_command(const uint8_t command, uint8_t *data)
+static stm32_err_t BL_sendCommand(uint8_t *command, uint8_t *rData, uint8_t rLen, uint8_t ackByte)
 {
     HAL_StatusTypeDef status = HAL_OK;
-    bool ret = false;
-    uint8_t buffer[2];
-    buffer[0] = command;
-    buffer[1] = 0xFF;
     
-    status = serialCommon_sendData(buffer, 2);
+    status = serialCommon_sendData(command, 2);
     
     /// read ack
-    status = serialCommon_readData(data, 15);
-    if(status == HAL_OK && data[0] == STM32_ACK)
+    status = serialCommon_readData(rData, rLen);
+    if(status == HAL_OK && ackByte == STM32_NACK)
     {
-        ret = true;
+        printf("[BL_sendCommand] [ERROR] Command not found !\n");
+        
+        return STM32_ERR_NACK;
     }
     
-    return ret;
+    return STM32_ERR_OK;
+}
+
+/** @brief  BL_send_command
+    @return stm32_err_t
+*/
+static stm32_err_t BL_get_command(BL_command_t *BL, uint8_t *data)
+{
+    stm32_err_t err = STM32_ERR_OK;
+    uint8_t getCommand[2] = {0};
+    
+    getCommand[0] = STM32_CMD_GET;
+    getCommand[1] = 0xff;
+    
+    err = BL_sendCommand(getCommand, data, 15, data[0]);
+    if(err != STM32_ERR_OK)
+    {
+        printf("[BL_get_command] [ERROR] %d\n", err);
+        
+        return err;
+    }
+    
+    return STM32_ERR_OK;
 }
 
 /** @brief  BL_getVersionAndRPStatus_command
-    @return bool
+    @return stm32_err_t
 */
-bool BL_getVersionAndRPStatus_command(const uint8_t command, uint8_t *data)
+static stm32_err_t BL_getVersionAndRPStatus_command(BL_command_t *BL, uint8_t *data)
 {
-    HAL_StatusTypeDef status = HAL_OK;
-    bool ret = false;
-    uint8_t buffer[2];
-    buffer[0] = command;
-    buffer[1] = 0xFE;
+    stm32_err_t err = STM32_ERR_OK;
+    uint8_t getVersionCommand[2] = {0};
     
-    status = serialCommon_sendData(buffer, 2);
+    getVersionCommand[0] = BL->cmd.gvr;
+    getVersionCommand[1] = 0xfe;
     
-    // read data
-    status = serialCommon_readData(data, 5);
-    if(status == HAL_OK && data[0] == STM32_ACK)
+    err = BL_sendCommand(getVersionCommand, data, 5, data[0]);
+    if(err != STM32_ERR_OK)
     {
-        ret = true;
+        printf("[BL_getVersionAndRPStatus_command] [ERROR] %d\n", err);
+        
+        return err;
     }
     
-    return ret;
+    return STM32_ERR_OK;
 }
 
 /** @brief  BL_getDeviceID_command
     @return bool
 */
-bool BL_getDeviceID_command(const uint8_t command, uint8_t *data)
+static stm32_err_t BL_getDeviceID_command(BL_command_t *BL, uint8_t *data)
 {
-    HAL_StatusTypeDef status = HAL_OK;
-    bool ret = false;
-    uint8_t buffer[2];
-    buffer[0] = command;
-    buffer[1] = 0xFD;
+    stm32_err_t err = STM32_ERR_OK;
+    uint8_t getDeviceIdCommand[2] = {0};
     
-    status = serialCommon_sendData(buffer, 2);
+    getDeviceIdCommand[0] = BL->cmd.gid;
+    getDeviceIdCommand[1] = 0xfd;
     
-    // read data
-    status = serialCommon_readData(data, 5);
-    if(status == HAL_OK && data[0] == STM32_ACK)
+    err = BL_sendCommand(getDeviceIdCommand, data, 5, data[0]);
+    if(err != STM32_ERR_OK)
     {
-        ret = true;
+        printf("[BL_getDeviceID_command] [ERROR] %d\n", err);
+        
+        return err;
     }
     
-    return ret;
+    return STM32_ERR_OK;
 }
 
 /** @brief  BL_readMemory_command
     @return stm32_err_t
 */
-stm32_err_t BL_readMemory_command(uint32_t address, uint8_t *data, uint16_t len)
+static stm32_err_t BL_readMemory_command(uint32_t address, uint8_t *data, uint16_t len)
 {
     HAL_StatusTypeDef status = HAL_OK;
     uint8_t ackByte = 0;
@@ -178,6 +197,8 @@ stm32_err_t BL_readMemory_command(uint32_t address, uint8_t *data, uint16_t len)
         return STM32_ERR_UNKNOWN;
     }
     
+    printf("[BL_readMemory_command] Read memory ....\n");
+    
     /// send read memory command
     status = serialCommon_sendData(buffer, 2);
     
@@ -190,6 +211,8 @@ stm32_err_t BL_readMemory_command(uint32_t address, uint8_t *data, uint16_t len)
         addressBuffer[2] = (address >> 8) & 0xFF;
         addressBuffer[3] = address & 0xFF;
         addressBuffer[4] = addressBuffer[0] ^ addressBuffer[1] ^ addressBuffer[2] ^ addressBuffer[3];
+        
+        printf("[BL_readMemory_command] Read memory from address 0x%x\n", address);
         
         /// send start address
         status = serialCommon_sendData(addressBuffer, 5);
@@ -206,10 +229,18 @@ stm32_err_t BL_readMemory_command(uint32_t address, uint8_t *data, uint16_t len)
             
             /// read data
             status = serialCommon_readData(data, len);
+            
+            printf("[BL_readMemory_command] Read memory successfull ....\n");
+        }
+        else
+        {
+            printf("[BL_readMemory_command] [ERROR] not found address ....\n");
         }
     }
     else
     {
+        printf("[BL_readMemory_command] [ERROR] not read memory ....\n");
+        
         return STM32_ERR_UNKNOWN;
     }
     
@@ -221,7 +252,7 @@ stm32_err_t BL_readMemory_command(uint32_t address, uint8_t *data, uint16_t len)
 /** @brief  BL_readOutProtect_command
     @return stm32_err_t
 */
-stm32_err_t BL_readOutProtect_command(const uint8_t command)
+static stm32_err_t BL_readOutProtect_command(const uint8_t command)
 {
     HAL_StatusTypeDef status = HAL_OK;
     uint8_t ackByte[2];
@@ -253,7 +284,7 @@ stm32_err_t BL_readOutProtect_command(const uint8_t command)
 /** @brief  BL_readOutUnProtect_command
     @return stm32_err_t
 */
-stm32_err_t BL_readOutUnProtect_command(const uint8_t command)
+static stm32_err_t BL_readOutUnProtect_command(const uint8_t command)
 {
     HAL_StatusTypeDef status = HAL_OK;
     uint8_t ackByte[2];
@@ -285,7 +316,7 @@ stm32_err_t BL_readOutUnProtect_command(const uint8_t command)
 /** @brief  BL_writeUnProtect_command
     @return stm32_err_t
 */
-stm32_err_t BL_writeUnProtect_command(const uint8_t command)
+static stm32_err_t BL_writeUnProtect_command(const uint8_t command)
 {
     HAL_StatusTypeDef status = HAL_OK;
     uint8_t ackByte[2] = {0};
@@ -318,7 +349,7 @@ stm32_err_t BL_writeUnProtect_command(const uint8_t command)
 /** @brief  BL_writeMemory_command
     @return stm32_err_t
 */
-stm32_err_t BL_writeMemory_command(BL_command_t *BL, uint32_t address, uint8_t *data, uint16_t len)
+static stm32_err_t BL_writeMemory_command(BL_command_t *BL, uint32_t address, uint8_t *data, uint16_t len)
 {
     HAL_StatusTypeDef status = HAL_OK;
     uint8_t ackByte = 0;
@@ -401,7 +432,7 @@ stm32_err_t BL_writeMemory_command(BL_command_t *BL, uint32_t address, uint8_t *
 /** @brief  BL_eraseMemory_command
     @return stm32_err_t
 */
-stm32_err_t BL_eraseMemory_command(uint8_t command)//(uint32_t fPage, uint32_t nPage)
+static stm32_err_t BL_eraseMemory_command(uint8_t command)//(uint32_t fPage, uint32_t nPage)
 {
     HAL_StatusTypeDef status = HAL_OK;
     uint8_t ackByte = 0;
@@ -451,7 +482,7 @@ stm32_err_t BL_eraseMemory_command(uint8_t command)//(uint32_t fPage, uint32_t n
 /** @brief  BL_verifyMemory
     @return stm32_err_t
 */
-stm32_err_t BL_verifyMemory(uint32_t addr, uint8_t *dataVerify, uint16_t len)
+static stm32_err_t BL_verifyMemory(uint32_t addr, uint8_t *dataVerify, uint16_t len)
 {
     uint8_t compareBuffer[256];
     uint16_t offset = 0;
@@ -459,6 +490,8 @@ stm32_err_t BL_verifyMemory(uint32_t addr, uint8_t *dataVerify, uint16_t len)
 //    uint8_t retry = 10;
 //    uint8_t failed = 0;
     stm32_err_t err = STM32_ERR_OK;
+    
+    printf("[BL_verifyMemory] Verify memory address 0x%x\n", addr);
     
     while(offset < len)
     {
@@ -488,7 +521,7 @@ stm32_err_t BL_verifyMemory(uint32_t addr, uint8_t *dataVerify, uint16_t len)
 //            ++failed;
         }
     }
-    
+    printf("[BL_verifyMemory] Verify memory successfull\n");
 //    failed = 0;
     
     return STM32_ERR_OK;
@@ -509,34 +542,36 @@ stm32_err_t BL_verifyMemory(uint32_t addr, uint8_t *dataVerify, uint16_t len)
 bool BL_command_getInfomation(BL_command_t *BL)
 {
     bool ret = false;
-    uint16_t len = 0;
+    stm32_err_t err = STM32_ERR_OK;
     uint8_t data[15];
     
-    /// send cmd GET ---> kiem tra ack
-    if(BL_get_command(STM32_CMD_GET, data) == false)
+    err = BL_get_command(BL, data);
+    if( err != STM32_ERR_OK)
     {
         return false;
     }
     
-    len = data[1];
-    BL->bl_version = data[2]; --len;
-    BL->cmd.get = data[3]; --len;
-    BL->cmd.gvr = data[4]; --len;
-    BL->cmd.gid = data[5]; --len;
-    BL->cmd.rm = data[6]; --len;
-    BL->cmd.go = data[7]; --len;
-    BL->cmd.wm = data[8]; --len;
-    BL->cmd.er = data[9]; --len;
-    BL->cmd.wp = data[10]; --len;
-    BL->cmd.uw = data[11]; --len;
-    BL->cmd.rp = data[12]; --len;
-    BL->cmd.ur = data[13]; --len;
+//    len = data[1];
+    BL->bl_version = data[2];
+    BL->cmd.get = data[3];
+    BL->cmd.gvr = data[4];
+    BL->cmd.gid = data[5];
+    BL->cmd.rm = data[6];
+    BL->cmd.go = data[7];
+    BL->cmd.wm = data[8];
+    BL->cmd.er = data[9];
+    BL->cmd.wp = data[10]; 
+    BL->cmd.uw = data[11];
+    BL->cmd.rp = data[12];
+    BL->cmd.ur = data[13];
     
     if(data[14] == STM32_ACK)
     {
+        printf("[BL_command_getInfomation]\nbl_version : 0x%x\nget : 0x%x\ngvr : 0x%x\ngid : 0x%x\nrm : 0x%x\ngo : 0x%x\nwm : 0x%x\ner : 0x%x\nwp : 0x%x\nuw : 0x%x\nrp : 0x%x\nur : 0x%x\n"
+        , BL->bl_version, BL->cmd.get, BL->cmd.gvr, BL->cmd.gid, BL->cmd.rm, BL->cmd.go, BL->cmd.wm, BL->cmd.er, BL->cmd.wp, BL->cmd.uw, BL->cmd.rp, BL->cmd.ur);
+        
         ret = true;
     }
-
 
     return ret;
 }
@@ -547,9 +582,11 @@ bool BL_command_getInfomation(BL_command_t *BL)
 bool BL_command_getVersion(BL_command_t *BL)
 {
     bool ret = false;
+    stm32_err_t err = STM32_ERR_OK;
     uint8_t data[5];
     
-    if(BL_getVersionAndRPStatus_command(0x01, data) == false)
+    err = BL_getVersionAndRPStatus_command(BL, data);
+    if( err != STM32_ERR_OK)
     {
         return false;
     }
@@ -560,6 +597,8 @@ bool BL_command_getVersion(BL_command_t *BL)
     
     if(data[4] == STM32_ACK)
     {
+        printf("[BL_command_getVersion] version : 0x%x\n option1 : 0x%x\n option2 : 0x%x\n ", BL->version, BL->option1, BL->option2);
+        
         ret = true;
     }
     
@@ -571,12 +610,13 @@ bool BL_command_getVersion(BL_command_t *BL)
 */
 bool BL_command_getDeviceID(BL_command_t *BL)
 {
-    
     bool ret = false;
+    stm32_err_t err = STM32_ERR_OK;
     uint16_t len = 0;
     uint8_t data[5];
     
-    if(BL_getDeviceID_command(0x02, data) == false)
+    err = BL_getDeviceID_command(BL, data);
+    if( err != STM32_ERR_OK)
     {
         return false;
     }
@@ -591,6 +631,8 @@ bool BL_command_getDeviceID(BL_command_t *BL)
     
     if(data[4] == STM32_ACK)
     {
+        printf("[BL_command_getDeviceID] Product Id : 0x%x\n", BL->pid);
+        
         ret = true;
     }
     
@@ -685,6 +727,8 @@ void BL_command_process(BL_command_t *BL)
     HAL_GPIO_WritePin(DTR_GPIO_Port, DTR_Pin, GPIO_PIN_RESET);
     HAL_Delay(100);
     HAL_GPIO_WritePin(DTR_GPIO_Port, DTR_Pin, GPIO_PIN_SET);
+    
+    printf("[BL_command_process] Programming successfull .... reset and run\n");
     
     while(1)
     {
