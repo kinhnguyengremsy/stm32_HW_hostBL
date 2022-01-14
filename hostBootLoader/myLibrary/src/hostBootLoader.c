@@ -26,10 +26,7 @@
 #include "BL_command.h"
 /* Private typedef------------------------------------------------------------------------------*/
 /* Private define------------------------------------------------------------------------------*/
-#define DTR_HIGH        HAL_GPIO_WritePin(DTR_GPIO_Port, DTR_Pin, GPIO_PIN_SET) // reset pin in mcu
-#define DTR_LOW         HAL_GPIO_WritePin(DTR_GPIO_Port, DTR_Pin, GPIO_PIN_RESET)
-#define RTS_HIGH        HAL_GPIO_WritePin(RTS_GPIO_Port, RTS_Pin, GPIO_PIN_SET) /// boot0 pin in mcu
-#define RTS_LOW         HAL_GPIO_WritePin(RTS_GPIO_Port, RTS_Pin, GPIO_PIN_RESET)
+
 /* Private macro------------------------------------------------------------------------------*/
 /* Private variables------------------------------------------------------------------------------*/
 BL_command_t command;
@@ -40,6 +37,11 @@ BL_command_t command;
     @{
 */#ifndef __HOST_BOOTLOADER_DEVICE_COMMUNICATION
 #define __HOST_BOOTLOADER_DEVICE_COMMUNICATION
+
+void hostBootLoader_readCallBacl(void *arg)
+{
+
+}
 
 /** @brief hostBootLoader_deviceReady
     @return bool
@@ -61,7 +63,7 @@ bool hostBootLoader_deviceReady(UART_HandleTypeDef *huart)
     HAL_Delay(100);
     
     serialCommon_sendData(&send, 1);
-    serialCommon_readData(&data, 1);
+    serialCommon_readData(&data, 1, hostBootLoader_readCallBacl);
     
     if(data == STM32_ACK)
     {

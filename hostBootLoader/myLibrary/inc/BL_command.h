@@ -31,6 +31,11 @@
 #include "stdbool.h"
 #include "string.h"
 /* Exported define ------------------------------------------------------------*/
+#define DTR_HIGH        HAL_GPIO_WritePin(DTR_GPIO_Port, DTR_Pin, GPIO_PIN_SET) // reset pin in mcu
+#define DTR_LOW         HAL_GPIO_WritePin(DTR_GPIO_Port, DTR_Pin, GPIO_PIN_RESET)
+#define RTS_HIGH        HAL_GPIO_WritePin(RTS_GPIO_Port, RTS_Pin, GPIO_PIN_SET) /// boot0 pin in mcu
+#define RTS_LOW         HAL_GPIO_WritePin(RTS_GPIO_Port, RTS_Pin, GPIO_PIN_RESET)
+
 #define STM32_ACK       0x79
 #define STM32_NACK      0x1F
 #define STM32_CMD_INIT  0x7F

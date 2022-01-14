@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;  ../Drivers/CMSIS/Include;  ..\myLibrary\inc</IncludePath>
+              <IncludePath>../Core/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy; ../Drivers/CMSIS/Device/ST/STM32F4xx/Include; ../Drivers/CMSIS/Include; ..\myLibrary\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -427,6 +427,11 @@
               <FileName>serialCommon.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\myLibrary\src\serialCommon.c</FilePath>
+            </File>
+            <File>
+              <FileName>pwmCommon.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\myLibrary\src\pwmCommon.c</FilePath>
             </File>
           </Files>
         </Group>

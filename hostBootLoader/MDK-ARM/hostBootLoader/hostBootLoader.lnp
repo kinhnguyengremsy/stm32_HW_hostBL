@@ -6,6 +6,7 @@
 "hostbootloader\hostbootloader.o"
 "hostbootloader\bl_command.o"
 "hostbootloader\serialcommon.o"
+"hostbootloader\pwmcommon.o"
 "hostbootloader\stm32f4xx_hal_tim.o"
 "hostbootloader\stm32f4xx_hal_tim_ex.o"
 "hostbootloader\stm32f4xx_hal_rcc.o"

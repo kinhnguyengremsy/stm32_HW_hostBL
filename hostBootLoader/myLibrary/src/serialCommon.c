@@ -89,12 +89,15 @@ HAL_StatusTypeDef serialCommon_sendData(uint8_t *data, uint16_t len)
 /** @brief  serialCommon_readData
     @return HAL_StatusTypeDef
 */
-HAL_StatusTypeDef serialCommon_readData(uint8_t *data, uint16_t len)
+HAL_StatusTypeDef serialCommon_readData(uint8_t *data, uint16_t len, Function_t func)
 {
     HAL_StatusTypeDef status = HAL_OK;
     
     status = HAL_UART_Receive_DMA(huartCommon, data, len);
-    while(rxComplete == false);
+    while(rxComplete == false)
+    {
+        func(NULL);
+    }
     rxComplete = false;
     
     return status;

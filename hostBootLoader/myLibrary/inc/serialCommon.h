@@ -32,7 +32,7 @@
 /* Exported define ------------------------------------------------------------*/
 
 /* Exported types ------------------------------------------------------------*/
-
+typedef void (*Function_t)( void * );
 /* Exported constants --------------------------------------------------------*/
 
 /* Exported macro ------------------------------------------------------------*/
@@ -51,7 +51,7 @@ HAL_StatusTypeDef serialCommon_sendData(uint8_t *data, uint16_t len);
 /** @brief  serialCommon_readData
     @return HAL_StatusTypeDef
 */
-HAL_StatusTypeDef serialCommon_readData(uint8_t *data, uint16_t len);
+HAL_StatusTypeDef serialCommon_readData(uint8_t *data, uint16_t len, Function_t func);
 
 /** @brief  serialConsole_init
     @return none
