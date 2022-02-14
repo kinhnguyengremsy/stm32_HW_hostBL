@@ -34,3 +34,4 @@ hostbootloader\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 hostbootloader\main.o: ..\myLibrary\inc\hostBootLoader.h
 hostbootloader\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 hostbootloader\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+hostbootloader\main.o: ..\myLibrary\inc\test.h
