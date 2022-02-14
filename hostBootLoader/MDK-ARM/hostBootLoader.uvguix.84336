@@ -3606,9 +3606,9 @@
       <ActiveTab>0</ActiveTab>
       <Doc>
         <Name>E:\2021-work\firmware\gremsy\stm32\stm32_HW_hostBL\hostBootLoader\myLibrary\src\test.c</Name>
-        <ColumnNumber>2</ColumnNumber>
+        <ColumnNumber>0</ColumnNumber>
         <TopLine>29</TopLine>
-        <CurrentLine>38</CurrentLine>
+        <CurrentLine>44</CurrentLine>
         <Folding>0</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

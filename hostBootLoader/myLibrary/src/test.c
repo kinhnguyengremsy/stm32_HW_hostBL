@@ -33,9 +33,14 @@
     @{
 */#ifndef __TEST_CONFIGURATION
 #define __TEST_CONFIGURATION
-/** @brief 
-    @return 
+/** @brief test_configuration
+    @return none
 */
+void test_configuration(void)
+{
+
+}
+
 
 
 
