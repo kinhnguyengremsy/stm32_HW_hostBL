@@ -29,10 +29,10 @@
 /* Private function prototypes------------------------------------------------------------------------------*/
 /* Private functions------------------------------------------------------------------------------*/
 
-/** @group 
+/** @group __TEST_CONFIGURATION
     @{
-*/#ifndef 
-#define 
+*/#ifndef __TEST_CONFIGURATION
+#define __TEST_CONFIGURATION
 /** @brief 
     @return 
 */
