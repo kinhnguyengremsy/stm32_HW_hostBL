@@ -40,7 +40,14 @@ BL_command_t command;
 
 void hostBootLoader_readCallBacl(void *arg)
 {
-
+    static uint32_t timeDebug = 0;
+    
+    if(HAL_GetTick() - timeDebug > 1000)
+    {
+        timeDebug = HAL_GetTick();
+        
+        printf("\n[hostBootLoader_readCallBack] waitting response from device\n");
+    }
 }
 
 /** @brief hostBootLoader_deviceReady

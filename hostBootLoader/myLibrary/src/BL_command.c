@@ -407,7 +407,7 @@ static stm32_err_t BL_eraseMemory_command(uint8_t command)//(uint32_t fPage, uin
     uint8_t ackByte = 0;
     uint8_t buffer[2];
     buffer[0] = command;
-    buffer[1] = 0xBB;
+    buffer[1] = 0xBC;//0xBB;
     
     printf("[BL_eraseMemory_command] Erase memory ....\n");
     
@@ -481,6 +481,47 @@ static stm32_err_t BL_verifyMemory(uint32_t addr, uint8_t *dataVerify, uint16_t 
     }
     printf("[BL_verifyMemory] Verify memory successfull\n");
 //    failed = 0;
+    
+    return STM32_ERR_OK;
+}
+
+/** @brief  BL_verifyMemory
+    @return stm32_err_t
+*/
+static stm32_err_t BL_go_command(uint8_t command, uint32_t address)
+{
+    stm32_err_t err = STM32_ERR_OK;
+    uint8_t ackByte = 0;
+    uint8_t buffer[2];
+    buffer[0] = command;
+    buffer[1] = 0xDE;
+    
+    printf("[BL_eraseMemory_command] send go command ....\n");
+    
+    err = BL_sendCommand(buffer, 2, &ackByte, 1, ackByte);
+    if(err != STM32_ERR_OK)
+    {
+        return err;
+    }
+    
+    printf("[BL_eraseMemory_command] send address and checksum ....\n");
+    
+    uint8_t goBuffer[5];
+    goBuffer[0] = address >> 24;
+    goBuffer[1] = (address >> 16) & 0xFF;
+    goBuffer[2] = (address >> 8) & 0xFF;
+    goBuffer[3] = address & 0xFF;
+    goBuffer[4] = goBuffer[0] ^ goBuffer[1] ^ goBuffer[2] ^ goBuffer[3];
+    
+    err = BL_sendCommand(goBuffer, 5, &ackByte, 1, ackByte);
+    if(err != STM32_ERR_OK)
+    {
+        printf("[BL_eraseMemory_command] send address and checksum fail ....\n");
+        
+        return err;
+    }
+    
+    printf("[BL_eraseMemory_command] go address successfull ....\n");
     
     return STM32_ERR_OK;
 }
@@ -648,8 +689,8 @@ void BL_command_init(BL_command_t *BL)
 void BL_command_process(BL_command_t *BL)
 {
     stm32_err_t err ;
-    uint32_t flashAddress = ADDR_FLASH_SECTOR_9;
-    uint32_t maxDataLength = 0x267c;
+    uint32_t flashAddress = ADDR_FLASH_SECTOR_4;
+    uint32_t maxDataLength = 0x113c;
     uint32_t start = 0x08000000;
     uint32_t end = start + maxDataLength;
     uint32_t left;
@@ -687,6 +728,8 @@ void BL_command_process(BL_command_t *BL)
     DTR_LOW;
     HAL_Delay(100);
     DTR_HIGH;
+    
+    BL_go_command(0x21, 0x08000000);
     
     printf("[BL_command_process] Programming successfull .... reset and run\n");
     
