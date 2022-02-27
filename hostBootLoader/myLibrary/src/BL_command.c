@@ -407,7 +407,7 @@ static stm32_err_t BL_eraseMemory_command(uint8_t command)//(uint32_t fPage, uin
     uint8_t ackByte = 0;
     uint8_t buffer[2];
     buffer[0] = command;
-    buffer[1] = 0xBC;//0xBB;
+    buffer[1] = 0xBB;
     
     printf("[BL_eraseMemory_command] Erase memory ....\n");
     
