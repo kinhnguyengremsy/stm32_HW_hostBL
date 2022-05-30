@@ -393,7 +393,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
+  
+  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_7, GPIO_PIN_SET);
 }
 
 /* USER CODE BEGIN 4 */

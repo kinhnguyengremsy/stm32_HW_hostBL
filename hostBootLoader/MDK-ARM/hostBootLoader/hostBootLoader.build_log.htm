@@ -22,12 +22,27 @@ Dialog DLL:      TCM.DLL V1.53.0.0
  
 <h2>Project:</h2>
 D:\Gremsy\firmware\sample\stm32_HW_hostBL\hostBootLoader\MDK-ARM\hostBootLoader.uvprojx
-Project File Date:  02/23/2022
+Project File Date:  04/26/2022
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'hostBootLoader'
-"hostBootLoader\hostBootLoader.axf" - 0 Error(s), 0 Warning(s).
+compiling BL_command.c...
+..\myLibrary\src\BL_command.c(693): warning:  #550-D: variable "err"  was set but never used
+      stm32_err_t err ;
+..\myLibrary\src\BL_command.c(270): warning:  #177-D: function "BL_readOutProtect_command"  was declared but never referenced
+  static stm32_err_t BL_readOutProtect_command(const uint8_t command)
+..\myLibrary\src\BL_command.c(290): warning:  #177-D: function "BL_readOutUnProtect_command"  was declared but never referenced
+  static stm32_err_t BL_readOutUnProtect_command(const uint8_t command)
+..\myLibrary\src\BL_command.c(310): warning:  #177-D: function "BL_writeUnProtect_command"  was declared but never referenced
+  static stm32_err_t BL_writeUnProtect_command(const uint8_t command)
+..\myLibrary\src\BL_command.c(493): warning:  #177-D: function "BL_go_command"  was declared but never referenced
+  static stm32_err_t BL_go_command(uint8_t command, uint32_t address)
+..\myLibrary\src\BL_command.c: 5 warnings, 0 errors
+linking...
+Program Size: Code=20516 RO-data=1156 RW-data=64 ZI-data=2576  
+FromELF: creating hex file...
+"hostBootLoader\hostBootLoader.axf" - 0 Error(s), 5 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -38,20 +53,20 @@ Package Vendor: ARM
    * Component: CORE Version: 5.5.0
 
 Package Vendor: Keil
-                http://www.keil.com/pack/Keil.STM32F4xx_DFP.2.7.0.pack
-                Keil.STM32F4xx_DFP.2.7.0
+                http://www.keil.com/pack/Keil.STM32F4xx_DFP.2.15.0.pack
+                Keil.STM32F4xx_DFP.2.15.0
                 STMicroelectronics STM32F4 Series Device Support, Drivers and Examples
 
 <h2>Collection of Component include folders:</h2>
   .\RTE\_hostBootLoader
   C:\Users\Gremsy-KinhNguyen\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include
-  C:\Users\Gremsy-KinhNguyen\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.7.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
+  C:\Users\Gremsy-KinhNguyen\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.15.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
 
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.5.0
       Include file:  CMSIS\Core\Include\tz_context.h
-Build Time Elapsed:  00:00:00
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

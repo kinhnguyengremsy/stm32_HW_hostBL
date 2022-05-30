@@ -73,6 +73,8 @@ static void BL_readDataFromFlash(BL_command_t *BL, uint32_t flashStartAddress)
         
         memcpy(&BL->writeData[i], (uint8_t *)&data, 4);
         
+        printf("\n[%d][%s] data from flash address 0x%x value = 0x%x\n", __LINE__, __FUNCTION__, (int)flashStartAddress, (int)data);
+        
         flashStartAddress += 4;
     }
 }
@@ -690,7 +692,7 @@ void BL_command_process(BL_command_t *BL)
 {
     stm32_err_t err ;
     uint32_t flashAddress = ADDR_FLASH_SECTOR_4;
-    uint32_t maxDataLength = 0x113c;
+    uint32_t maxDataLength = 0x17270;
     uint32_t start = 0x08000000;
     uint32_t end = start + maxDataLength;
     uint32_t left;
@@ -726,10 +728,10 @@ void BL_command_process(BL_command_t *BL)
     
     /// realease pin reset
     DTR_LOW;
-    HAL_Delay(100);
+    HAL_Delay(1000);
     DTR_HIGH;
     
-    BL_go_command(0x21, 0x08000000);
+//    BL_go_command(0x21, 0x08000000);
     
     printf("[BL_command_process] Programming successfull .... reset and run\n");
     
